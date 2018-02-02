@@ -190,25 +190,6 @@ angular.module('canoeApp').config(function (historicLogProvider, $provide, $logP
         }
       })
 
-      .state('tabs.account.addresses', {
-        url: '/addresses/:walletId/:toAddress',
-        views: {
-          'tab-home@tabs': {
-            controller: 'addressesController',
-            templateUrl: 'views/addresses.html'
-          }
-        }
-      })
-      .state('tabs.account.allAddresses', {
-        url: '/allAddresses/:walletId',
-        views: {
-          'tab-home@tabs': {
-            controller: 'addressesController',
-            templateUrl: 'views/allAddresses.html'
-          }
-        }
-      })
-
       /*
        *
        * Tabs
@@ -927,7 +908,6 @@ angular.module('canoeApp').config(function (historicLogProvider, $provide, $logP
             throw new Error(err) // TODO
           }
         } else {
-          profileService.storeProfileIfDirty()
           $log.debug('Profile loaded ... Starting UX.')
           scannerService.gentleInitialize()
           // Reload tab-home if necessary (from root path: starting)

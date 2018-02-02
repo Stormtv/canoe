@@ -12,7 +12,7 @@ angular.module('canoeApp.services').factory('configService', function (storageSe
       }
     },
 
-    //TODO We need URL for rating iOS app, and Android
+    // TODO We need URL for rating iOS app, and Android
     rateApp: {
       canoe: {
         ios: '<URLNEEDED>',
@@ -22,8 +22,7 @@ angular.module('canoeApp.services').factory('configService', function (storageSe
     },
     // wallet default config
     wallet: {
-      reconnectDelay: 5000,
-      idleDurationMin: 4,
+      serverSidePoW: true,
       settings: {
         unitName: 'XRB',
         unitToRaw: Math.pow(10, 30),
@@ -46,10 +45,6 @@ angular.module('canoeApp.services').factory('configService', function (storageSe
 
     hideNextSteps: {
       enabled: !!isWindowsPhoneApp
-    },
-
-    rates: {
-      url: 'https://insight.bitpay.com:443/api/rates'
     },
 
     release: {

@@ -15,7 +15,7 @@ angular.module('canoeApp.services')
     var root = {}
     root.profile = null
     root.wallet = null
-    root.password = 'canoe' // TODO Hardcoded for testing during dev!!!!
+    root.password = 'hubbabubba' // TODO Hardcoded for testing during dev!!!!
 
     // This is where we keep the password entered when you start Canoe
     // or when timeout is reached and it needs to be entered again.
@@ -81,14 +81,10 @@ angular.module('canoeApp.services')
       }
     }
 
-    // This creates a new Wallet with the old password and new seed
-    // All accounts are cleared, but we create one new default account.
+    // Create a new wallet, but reuse existing id, password and tokens
     root.importSeed = function (seed, cb) {
       $log.debug('Importing Wallet Seed')
-      raiblocksService.createWallet(root.wallet.password, seed)
-      $log.debug('Recreating first account')
-      // TODO... ehm
-      root.createAccount(null, cb)
+      return root.createWallet(null, seed, cb)
     }
 
     root.updateAllAccounts = function (cb) {
@@ -146,7 +142,7 @@ angular.module('canoeApp.services')
       })
     }
 
-    function _balanceIsHidden (wallet, cb) {
+    function balanceIsHidden (wallet, cb) {
       storageService.getHideBalanceFlag(wallet.credentials.walletId, function (err, shouldHideBalance) {
         if (err) $log.error(err)
         var hideBalance = (shouldHideBalance == 'true')
@@ -156,9 +152,6 @@ angular.module('canoeApp.services')
 
     root.bindProfile = function (profile, cb) {
       root.profile = profile
-      // Make sure this service has it, for communicating with the server
-      raiblocksService.setProfileId(profile.id)
-
       configService.get(function (err) {
         $log.debug('Preferences read')
         if (err) return cb(err)
@@ -201,17 +194,19 @@ angular.module('canoeApp.services')
 
     // Do we have funds? Presuming we are up to date here. It's a bigInt
     root.hasFunds = function () {
-      return root.wallet.getWalletBalance().get(0)
+      return root.wallet.getWalletBalance().greater(0)
     }
 
-    // Create wallet and default account which saves wallet, seed can be null.
+    // Create wallet and default account (which saves wallet), seed can be null.
     root.createWallet = function (password, seed, cb) {
       // Synchronous now
-      root.wallet = raiblocksService.createWallet(password, seed)
-      root.setWalletId(root.wallet.getId(), function (err) {
-        if (err) return cb(err)
-        // Create default acount, will save
-        root.createAccount(null, cb)
+      raiblocksService.createWallet(password, seed, function (wallet) {
+        root.setWalletId(wallet.getId(), function (err) {
+          if (err) return cb(err)
+          root.wallet = wallet
+          // Create default acount, will save
+          root.createAccount(null, cb)
+        })
       })
     }
 
@@ -237,8 +232,10 @@ angular.module('canoeApp.services')
           return cb(err)
         }
         root.wallet = wallet
-        root.setWalletId(wallet.id)
-        cb(null, wallet)
+        root.setWalletId(wallet.id, function (err) {
+          if (err) return cb(err)
+          cb(null, wallet)
+        })
       })
     }
 
